@@ -249,18 +249,18 @@ Users must comply with applicable laws.
 
 ## 📧 Support & Contact
 
-- Issues: [GitHub Issues](https://github.com/yourusername/steganography-tool/issues)
-- Discussions: [GitHub Discussions](https://github.com/yourusername/steganography-tool/discussions)
+- Issues: [GitHub Issues](https://github.com/swilliams9772/secret-agent/issues)
+- Discussions: [GitHub Discussions](https://github.com/swilliams9772/secret-agent/discussions)
 - Email: your.email@example.com
-- Documentation: [Wiki](https://github.com/yourusername/steganography-tool/wiki)
+- Documentation: [Wiki](https://github.com/swilliams9772/secret-agent/wiki)
 
 ## 📈 Project Stats
 
-![GitHub Stars](https://img.shields.io/github/stars/yourusername/steganography-tool)
-![GitHub Forks](https://img.shields.io/github/forks/yourusername/steganography-tool)
-![GitHub Issues](https://img.shields.io/github/issues/yourusername/steganography-tool)
-![GitHub License](https://img.shields.io/github/license/yourusername/steganography-tool)
+![GitHub Stars](https://img.shields.io/github/stars/swilliams9772/secret-agent)
+![GitHub Forks](https://img.shields.io/github/forks/swilliams9772/secret-agent)
+![GitHub Issues](https://img.shields.io/github/issues/swilliams9772/secret-agent)
+![GitHub License](https://img.shields.io/github/license/swilliams9772/secret-agent)
 
 ## 🌟 Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=yourusername/steganography-tool&type=Date)](https://star-history.com/#yourusername/steganography-tool&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=swilliams9772/secret-agent&type=Date)](https://star-history.com/#swilliams9772/secret-agent&Date)
