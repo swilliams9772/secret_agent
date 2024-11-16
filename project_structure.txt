@@ -1,27 +1,57 @@
 steganography-tool/
 ├── src/
-│   ├── __init__.py
-│   ├── steganography.py
-│   ├── streamlit_app.py
-│   └── stego_gui.py
-├── examples/
-│   ├── __init__.py
-│   ├── example.py
-│   └── sample_images/
-│       ├── cover.png
-│       └── secret.txt
+│   ├── steganography/
+│   │   ├── __init__.py
+│   │   ├── core.py            # Main steganography engine
+│   │   ├── utils.py           # Utility functions
+│   │   ├── encryption.py      # Encryption handling
+│   │   └── exceptions.py      # Custom exceptions
+│   ├── interfaces/
+│   │   ├── __init__.py
+│   │   ├── web/              # Streamlit interface
+│   │   │   ├── __init__.py
+│   │   │   ├── app.py
+│   │   │   └── components/
+│   │   └── desktop/          # Tkinter interface
+│   │       ├── __init__.py
+│   │       ├── app.py
+│   │       └── components/
+│   └── config/
+│       ├── __init__.py
+│       └── settings.py
 ├── tests/
 │   ├── __init__.py
-│   ├── test_steganography.py
-│   └── test_data/
-│       ├── test_carrier.png
-│       └── test_secret.txt
+│   ├── unit/
+│   │   ├── __init__.py
+│   │   ├── test_core.py
+│   │   └── test_encryption.py
+│   ├── integration/
+│   │   ├── __init__.py
+│   │   └── test_interfaces.py
+│   └── data/
+│       ├── carrier.png
+│       └── secret.txt
+├── examples/
+│   ├── __init__.py
+│   ├── basic_usage.py
+│   └── advanced_usage.py
 ├── docs/
-│   ├── README.md
+│   ├── api/
+│   ├── guides/
 │   └── images/
-│       ├── screenshot_streamlit.png
-│       └── screenshot_gui.png
+├── scripts/
+│   ├── install.sh
+│   └── setup_dev.sh
+├── .github/
+│   ├── workflows/
+│   │   └── ci.yml
+│   └── ISSUE_TEMPLATE/
+├── pyproject.toml
+├── setup.py
+├── requirements/
+│   ├── base.txt
+│   ├── dev.txt
+│   └── test.txt
 ├── .gitignore
 ├── LICENSE
-├── README.md
-└── requirements.txt 
+└── README.md 
