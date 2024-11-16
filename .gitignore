@@ -35,4 +35,6 @@ ENV/
 temp_*
 *.tmp*
 stego_settings.json
-output/ 
+output/
+.DS_Store
+  
