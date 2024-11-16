@@ -1,6 +1,5 @@
 import streamlit as st
 from steganography import SteganoExfil
-from config import Settings
 import os
 import io
 import json
@@ -10,11 +9,13 @@ import mimetypes
 class SteganoApp:
     def __init__(self):
         self.stego = SteganoExfil()
-        self.settings = Settings()
+        self.settings_file = "stego_settings.json"
+        self.max_file_size_mb = 10
         self.setup_page()
         
     def setup_page(self):
         """Initialize page configuration and theme"""
+        # Theme and page config
         theme = st.sidebar.selectbox(
             "Theme",
             ["Light", "Dark"],
@@ -28,16 +29,37 @@ class SteganoApp:
             layout="wide",
             initial_sidebar_state="expanded"
         )
+        
+        # Load saved settings
+        self.load_settings()
+        
+    def load_settings(self):
+        """Load saved settings from file"""
+        if os.path.exists(self.settings_file):
+            with open(self.settings_file, 'r') as f:
+                self.settings = json.load(f)
+        else:
+            self.settings = {
+                "theme": "Light",
+                "max_file_size_mb": 10,
+                "default_method": "dct",
+                "default_quality": 0.8
+            }
+            
+    def save_settings(self):
+        """Save current settings to file"""
+        with open(self.settings_file, 'w') as f:
+            json.dump(self.settings, f)
             
     def handle_theme_change(self):
         """Handle theme change and save settings"""
-        self.settings.set("theme", st.session_state.theme)
+        self.settings["theme"] = st.session_state.theme
+        self.save_settings()
 
     def validate_file_size(self, file):
         """Validate file size against maximum limit"""
-        max_size = self.settings.get("max_file_size_mb", 10)
-        if file.size > max_size * 1024 * 1024:
-            return False, f"File too large (max {max_size}MB)"
+        if file.size > self.max_file_size_mb * 1024 * 1024:
+            return False, f"File too large (max {self.max_file_size_mb}MB)"
         return True, ""
 
     def estimate_capacity(self, carrier_file, method):
@@ -45,6 +67,7 @@ class SteganoApp:
         if not carrier_file:
             return 0
             
+        # Save carrier temporarily
         temp_carrier = f"temp_carrier{Path(carrier_file.name).suffix}"
         with open(temp_carrier, "wb") as f:
             f.write(carrier_file.read())
@@ -53,12 +76,12 @@ class SteganoApp:
             carrier = self.stego._prepare_carrier_image(temp_carrier)
             if method == 'dct':
                 capacity = self.stego._calculate_dct_capacity(carrier)
-                return capacity // 8
+                return capacity // 8  # Convert bits to bytes
             else:
+                # LSB capacity (3 channels * pixels)
                 return carrier.size * 3 // 8
         finally:
-            if os.path.exists(temp_carrier):
-                os.remove(temp_carrier)
+            os.remove(temp_carrier)
 
     def preview_text_file(self, file):
         """Preview text file contents"""
@@ -66,7 +89,7 @@ class SteganoApp:
             content = file.read().decode('utf-8')
             with st.expander("File Preview"):
                 st.text_area("Content", content, height=200)
-            file.seek(0)
+            file.seek(0)  # Reset file pointer
             return True
         except UnicodeDecodeError:
             return False
@@ -80,9 +103,11 @@ class SteganoApp:
             progress = (i + 1) / len(secret_files)
             status_text.text(f"Processing {secret_file.name}...")
             
+            # Generate output filename
             output_name = f"stego_{i}_{Path(carrier_file.name).stem}.png"
             
             try:
+                # Process file
                 secret_data = secret_file.read()
                 self.process_single_file(
                     carrier_file, 
@@ -92,6 +117,7 @@ class SteganoApp:
                     password, 
                     quality
                 )
+                
                 progress_bar.progress(progress)
                 
             except Exception as e:
@@ -103,12 +129,14 @@ class SteganoApp:
 
     def process_single_file(self, carrier_file, secret_data, output_name, method, password, quality):
         """Process a single file for hiding"""
+        # Save carrier temporarily
         temp_carrier = f"temp_carrier{Path(carrier_file.name).suffix}"
         with open(temp_carrier, "wb") as f:
             carrier_file.seek(0)
             f.write(carrier_file.read())
         
         try:
+            # Hide data
             self.stego.hide_data(
                 data=secret_data,
                 carrier_image_path=temp_carrier,
@@ -118,6 +146,7 @@ class SteganoApp:
                 quality=quality
             )
             
+            # Provide download button
             with open(output_name, "rb") as f:
                 st.download_button(
                     label=f"Download {output_name}",
@@ -127,8 +156,8 @@ class SteganoApp:
                 )
                 
         finally:
-            if os.path.exists(temp_carrier):
-                os.remove(temp_carrier)
+            # Cleanup
+            os.remove(temp_carrier)
             if os.path.exists(output_name):
                 os.remove(output_name)
 
@@ -136,36 +165,42 @@ class SteganoApp:
         """Render the hide data tab"""
         st.header("Hide Secret Data")
         
+        # File uploads with drag-and-drop
         carrier_file = st.file_uploader(
             "Drop or choose carrier image",
-            type=self.settings.get("supported_formats"),
+            type=['png', 'jpg', 'jpeg', 'bmp'],
             key="hide_carrier",
             help="Drag and drop supported!"
         )
         
         secret_files = st.file_uploader(
             "Drop or choose files to hide",
+            type=['txt', 'pdf', 'jpg', 'png', 'doc', '*'],
             accept_multiple_files=True,
             key="secret_files",
             help="Multiple files supported!"
         )
 
         if carrier_file:
+            # Validate carrier file size
             valid, error = self.validate_file_size(carrier_file)
             if not valid:
                 st.error(error)
                 return
                 
+            # Show carrier preview and details
             col1, col2 = st.columns(2)
             with col1:
                 st.image(carrier_file, caption="Carrier Image")
             with col2:
+                # Configuration
                 method = st.radio(
                     "Steganography Method",
                     options=['dct', 'lsb'],
                     help="DCT is more secure but slower"
                 )
                 
+                # Estimate and show capacity
                 capacity = self.estimate_capacity(carrier_file, method)
                 st.info(f"""
                 **Carrier Details:**
@@ -174,6 +209,7 @@ class SteganoApp:
                 - Estimated Capacity: {round(capacity/1024, 2)} KB
                 """)
 
+        # Show file previews
         if secret_files:
             with st.expander("File Previews", expanded=True):
                 for file in secret_files:
@@ -183,6 +219,7 @@ class SteganoApp:
                     st.write(f"Size: {round(file.size/1024, 2)} KB")
                     st.divider()
 
+        # Advanced settings
         with st.expander("Advanced Settings"):
             password = st.text_input(
                 "Password",
@@ -198,6 +235,7 @@ class SteganoApp:
                 help="Higher quality = less capacity"
             )
 
+        # Process button
         if st.button(
             "Hide Data",
             type="primary",
@@ -217,7 +255,7 @@ class SteganoApp:
         
         stego_file = st.file_uploader(
             "Drop or choose stego image",
-            type=self.settings.get("supported_formats"),
+            type=['png', 'jpg', 'jpeg', 'bmp'],
             key="extract_stego"
         )
 
@@ -241,23 +279,27 @@ class SteganoApp:
             if st.button("Extract Data", type="primary"):
                 try:
                     with st.spinner("Extracting data..."):
+                        # Save stego image temporarily
                         temp_stego = f"temp_stego{Path(stego_file.name).suffix}"
                         with open(temp_stego, "wb") as f:
                             f.write(stego_file.read())
                         
+                        # Extract data
                         extracted_data = self.stego.extract_data(
                             stego_image_path=temp_stego,
                             password=password,
                             method=method
                         )
                         
-                        if os.path.exists(temp_stego):
-                            os.remove(temp_stego)
+                        # Cleanup
+                        os.remove(temp_stego)
                         
+                        # Try to determine file type
                         file_type = mimetypes.guess_type("extracted_data")[0]
                         if not file_type:
                             file_type = "application/octet-stream"
                         
+                        # Show success and download button
                         st.success("Data extracted successfully!")
                         st.download_button(
                             "Download Extracted Data",
@@ -273,48 +315,52 @@ class SteganoApp:
         """Render the settings tab"""
         st.header("Settings")
         
+        # General settings
         st.subheader("General")
-        max_file_size = st.number_input(
+        self.settings["max_file_size_mb"] = st.number_input(
             "Maximum file size (MB)",
             min_value=1,
             max_value=100,
             value=self.settings.get("max_file_size_mb", 10)
         )
-        self.settings.set("max_file_size_mb", max_file_size)
         
+        # Default values
         st.subheader("Defaults")
-        default_method = st.selectbox(
+        self.settings["default_method"] = st.selectbox(
             "Default steganography method",
             options=['dct', 'lsb'],
             index=0 if self.settings.get("default_method") == 'dct' else 1
         )
-        self.settings.set("default_method", default_method)
         
-        default_quality = st.slider(
+        self.settings["default_quality"] = st.slider(
             "Default image quality",
             min_value=0.1,
             max_value=1.0,
             value=self.settings.get("default_quality", 0.8)
         )
-        self.settings.set("default_quality", default_quality)
         
+        # Save settings button
         if st.button("Save Settings"):
-            self.settings.save()
+            self.save_settings()
             st.success("Settings saved!")
 
     def run(self):
         """Run the Streamlit app"""
         st.title("🕵️‍♂️ Steganography Tool")
         
+        # Create tabs
         tab1, tab2, tab3 = st.tabs(["Hide Data", "Extract Data", "Settings"])
         
         with tab1:
             self.render_hide_tab()
+        
         with tab2:
             self.render_extract_tab()
+            
         with tab3:
             self.render_settings_tab()
         
+        # Footer
         st.markdown("---")
         st.markdown("""
             <div style='text-align: center'>

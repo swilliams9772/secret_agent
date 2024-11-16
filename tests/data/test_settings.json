@@ -1,0 +1,19 @@
+{
+    "theme": "Light",
+    "max_file_size_mb": 10,
+    "default_method": "dct",
+    "default_quality": 0.8,
+    "supported_formats": [".png", ".jpg", ".jpeg", ".bmp"],
+    "temp_dir": "temp",
+    "recent_files": [],
+    "auto_cleanup": true,
+    "preview_size": [300, 300],
+    "max_recent_files": 5,
+    "error_detection": true,
+    "compression_level": 0,
+    "test_mode": {
+        "enabled": true,
+        "skip_encryption": false,
+        "mock_progress": false
+    }
+} 
