@@ -1,0 +1,27 @@
+steganography-tool/
+├── src/
+│   ├── __init__.py
+│   ├── steganography.py
+│   ├── streamlit_app.py
+│   └── stego_gui.py
+├── examples/
+│   ├── __init__.py
+│   ├── example.py
+│   └── sample_images/
+│       ├── cover.png
+│       └── secret.txt
+├── tests/
+│   ├── __init__.py
+│   ├── test_steganography.py
+│   └── test_data/
+│       ├── test_carrier.png
+│       └── test_secret.txt
+├── docs/
+│   ├── README.md
+│   └── images/
+│       ├── screenshot_streamlit.png
+│       └── screenshot_gui.png
+├── .gitignore
+├── LICENSE
+├── README.md
+└── requirements.txt 
