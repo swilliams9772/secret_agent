@@ -251,7 +251,7 @@ Users must comply with applicable laws.
 
 - Issues: [GitHub Issues](https://github.com/swilliams9772/secret-agent/issues)
 - Discussions: [GitHub Discussions](https://github.com/swilliams9772/secret-agent/discussions)
-- Email: your.email@example.com
+- Email: swilliams9772@gmail.com
 - Documentation: [Wiki](https://github.com/swilliams9772/secret-agent/wiki)
 
 ## 📈 Project Stats
